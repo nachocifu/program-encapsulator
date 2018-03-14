@@ -41,7 +41,7 @@ int main(int argc, char const *argv[]) {
 	
 	// First lets read from std input.
 	char * buffer = calloc(BUFFER_SIZE - 1, sizeof(char));
-	int buffer_index = read(STDIN_FILENO, buffer, BUFFER_SIZE - 1);
+	int buffer_index = read(STDIN_FILENO, buffer, BUFFER_SIZE - 1) - 1;
 
 
 	//Lets open 2 pipes. One for reading and one for writing.
@@ -82,10 +82,23 @@ int main(int argc, char const *argv[]) {
 
 		// Read the response from the child.
 		char * child_response = calloc(BUFFER_SIZE - 1, sizeof(char));
-		int child_response_lenght = read(PARENT_READ_FD, child_response, BUFFER_SIZE - 1);
+		int child_response_lenght = read(PARENT_READ_FD, child_response, BUFFER_SIZE - 1) - 1;
 
-		// Print it!
+
+		// Calculate parity of input
+		unsigned char buffer_parity = 0;
+		for (int i = 0; i < buffer_index; i++)
+			buffer_parity ^= buffer[i];
+
+		// Calculate parity of output
+		unsigned char output_parity = 0;
+		for (int i = 0; i < child_response_lenght; i++)
+			output_parity ^= child_response[i];
+
 		printf("%s\n", child_response);
+
+		fprintf(stderr, "in  parity: 0x%02X\n", buffer_parity);
+		fprintf(stderr, "out parity: 0x%02X\n", output_parity);
 
 
 	}
