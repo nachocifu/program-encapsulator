@@ -42,7 +42,6 @@ int main(int argc, char const *argv[]) {
 	// First lets read from std input.
 	char * buffer = calloc(BUFFER_SIZE - 1, sizeof(char));
 	int buffer_index = read(STDIN_FILENO, buffer, BUFFER_SIZE - 1);
-	buffer[buffer_index + 1] = '\0';
 
 
 	//Lets open 2 pipes. One for reading and one for writing.
@@ -64,25 +63,29 @@ int main(int argc, char const *argv[]) {
 		close(PARENT_READ_FD);
 		close(PARENT_WRITE_FD);
 
+
 		// Run the command.
-		system("say\n");
+		system(input_command);
 
 	} else {
 		// This is the parent.
+
+		// Lets configure the pipes.
 		close(CHILD_WRITE_FD);
 		close(CHILD_READ_FD);
 
 
 		// Write the command to the child.
 		write(PARENT_WRITE_FD, buffer, buffer_index);
+		close(PARENT_WRITE_FD);
 
-		// // Read the response from the child.
-		// char * child_response = calloc(BUFFER_SIZE - 1, sizeof(char));
-		// int child_response_lenght = read(PARENT_READ_FD, child_response, BUFFER_SIZE - 1);
-		// child_response[child_response_lenght + 1] = '\0';
 
-		// // Print it!
-		// printf("%s\n", child_response);
+		// Read the response from the child.
+		char * child_response = calloc(BUFFER_SIZE - 1, sizeof(char));
+		int child_response_lenght = read(PARENT_READ_FD, child_response, BUFFER_SIZE - 1);
+
+		// Print it!
+		printf("%s\n", child_response);
 
 
 	}
